@@ -1,7 +1,8 @@
+import copy
+from equistore import Labels, TensorMap, TensorBlock
+import numpy as np
+
 def TensorMapCombinator(tMap1, tMap2):
-    
-    import copy
-    from equistore import Labels, TensorMap, TensorBlock
     
     '''
     This function is used to combine two TensorMaps with the following same properties:
