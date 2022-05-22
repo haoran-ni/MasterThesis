@@ -11,6 +11,10 @@ def TensorMapCombinator(tMap1, tMap2):
         TensorMap.block(0).samples.names
         TensorMap.block(0).components
         TensorMap.block(0).properties
+        TensorMap.block(0).has_gradient('positions')
+        TensorMap.block(0).gradient('positions').samples.names
+        TensorMap.block(0).gradient('positions').components
+        TensorMap.block(0).gradient('positions').properties
     
     Having confirmed that the above properties are the same, this function will
     create a new TensorMap with the following properties:
@@ -27,6 +31,11 @@ def TensorMapCombinator(tMap1, tMap2):
                                          = TensorMap2.block(0).components
         NewTensorMap.block(0).properties = TensorMap1.block(0).properties
                                          = TensorMap2.block(0).properties
+        NewTensorMap.block(0).gradient(‘positions’).data = TensorMap1.block(0).gradient(‘positions’).data
+                                                         + TensorMap2.block(0).gradient(‘positions’).data
+        NewTensorMap.block(0).gradient(‘positions’).samples = xxx.gradient(‘positions’).samples 
+                                                            + xxx.gradient(‘positions’).samples
+        components are properties of TensorMap.block(0).gradient(‘positions’) remain the same
     
     Have fun!
     '''
@@ -80,6 +89,48 @@ def TensorMapCombinator(tMap1, tMap2):
     
     
     tMapTensorBlock = TensorBlock(tMapValues, tMapSamples, tMapComponents, tMapProperties)
+    
+    
+    ### Gradient Examination
+    if tMap1.block(0).has_gradient('positions') != tMap2.block(0).has_gradient('positions'):
+        raise Exception('The TensorMap.block(0).has_gradient("positions") should be the same!')
+    
+    if tMap1.block(0).has_gradient('positions') == True:
+    
+        if tMap1.block(0).gradient('positions').samples.names != tMap1.block(0).gradient('positions').samples.names:
+            raise Exception('The gradient.samples.names should be the same!')
+
+        ### Examination of gradient components is skipped
+        
+        for i in np.arange(len(tMap1.block(0).gradient('positions').properties)):
+            for j in np.arange(len(tMap1.block(0).gradient('positions').properties[0])):
+                if tMap1.block(0).gradient('positions').properties[i][j] != tMap2.block(0).gradient('positions').properties[i][j]:
+                    raise Exception('The gradient.properties should be exactly the same!')
+                else:
+                    continue
+        
+        ### New gradient data
+        gradData = np.concatenate((tMap1.block(0).gradient('positions').data,tMap2.block(0).gradient('positions').data),axis=0)
+        
+        ### New gradient samples
+        grad2Temp = copy.deepcopy(tMap2.block(0).gradient('positions').samples)
+        grad2Temp['sample'] += max(tMap1.block(0).gradient('positions').samples['sample'])+1
+        grad2Temp['structure'] += max(tMap1.block(0).gradient('positions').samples['structure'])+1
+        gradSamples = np.concatenate((tMap1.block(0).gradient('positions').samples,grad2Temp), axis=0)
+        gradSampleList = []
+        for i in gradSamples:
+            gradSampleEntry = []
+            for j in i:
+                gradSampleEntry.append(j)
+            gradSampleList.append(gradSampleEntry)
+        gradSampleList = np.array(gradSampleList)
+        gradSamples = Labels(tMap1.block(0).gradient('positions').samples.names, gradSampleList)
+        
+        ### New gradient components
+        gradComponents = tMap1.block(0).gradient('positions').components
+        
+        
+        tMapTensorBlock.add_gradient('positions', gradData, gradSamples, gradComponents)
     
     tMap = TensorMap(tMap1.keys, [tMapTensorBlock])
     
