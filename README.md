@@ -1,6 +1,6 @@
 # MasterThesis
 
-This repository contains all codes needed to reproduce the results of my master thesis. To obtain the same results, the versions of the packages are very important, as shown below.
+This repository contains all codes needed to reproduce the results of my master thesis. To obtain the same results, the versions of the packages are given below.
 
 - **equistore**: commit 5b6bc28b83540abdc28142e5d89f95d9c5a16b78 (HEAD -> master, origin/master, origin/HEAD)
 - **librascal**: commit dcff1c3c06400a9ed83021ae9e9f61ca2d4a3ebb (HEAD -> phosphorus, origin/project/phosphorus)
